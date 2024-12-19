@@ -16,7 +16,7 @@ export const createCard = function (card, cardForClone, delFunc, likeCard, openC
     // Получаем кнопку удаления в карточке и устанавливаем коллбэк с удалением
     const cardElementCloneDeleteBtn = cardElementClone.querySelector(".card__delete-button");
     cardElementCloneDeleteBtn.addEventListener("click",()=> {
-        delFunc(cardElementCloneDeleteBtn, '.card')
+        delFunc(cardElementClone)
     })
 
     // Получаем кнопку лайка и устанавливаем событие для лайка
@@ -35,8 +35,8 @@ export const createCard = function (card, cardForClone, delFunc, likeCard, openC
 }
 
 // Функция удаления карточки
-export function deleteCard(deleteButton, selectorToDelete) {
-    deleteButton.closest(selectorToDelete).remove()
+export function deleteCard(card) {
+    card.remove()
 }
 
 // Функция поставить лайк

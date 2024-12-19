@@ -1,7 +1,7 @@
 import './pages/index.css'
 import {initialCards} from "./components/cards";
 import {createCard, deleteCard, likeCard} from "./components/card";
-import {openModal, closeModal, closeModalOnEsc, closeModalByClickOutside} from "./components/modal"
+import {openModal, closeModal} from "./components/modal"
 
 
 // Темплейт карточки
@@ -21,6 +21,8 @@ const editProfileForm = document.forms["edit-profile"]
 const addCardBtn = document.querySelector(".profile__add-button");
 // Поп-ап добавления карточки
 const addCardPopup = document.querySelector(".popup_type_new-card");
+const addCardPopupName = addCardPopup.querySelector(".popup__input_type_card-name");
+const addCardPopupUrl = addCardPopup.querySelector(".popup__input_type_url");
 // Форма добавления новой карточки
 const addNewPlaceForm = document.forms["new-place"]
 
@@ -30,6 +32,11 @@ const fullScreenCardPopUp = document.querySelector(".popup_type_image");
 // Получаем имя и описание на странице и записываем их значения в
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
+
+// Все крестики закрытия поп-апов
+const popUpCloseBtns = document.querySelectorAll('.popup__close');
+
+// Записываем данные со страницы в инпуты формы
 editProfileForm.name.value = profileTitle.textContent;
 editProfileForm.description.value = profileDescription.textContent;
 
@@ -38,13 +45,19 @@ editProfifeBtn.addEventListener("click", () => {
     openModal(editProfilePopup);
 });
 // Обработчик «отправки» формы редактирования
-function handleFormSubmit(evt) {
+function handleEditProfileFormSubmit(evt) {
     evt.preventDefault();
+
+    // Записываем данные со страницы в инпуты формы
     profileTitle.textContent = editProfileForm.name.value;
     profileDescription.textContent = editProfileForm.description.value;
+    // Передаем данные из инпутов формы на страницу
+    editProfileForm.name.value = profileTitle.textContent;
+    editProfileForm.description.value = profileDescription.textContent;
+
     closeModal(editProfilePopup);
 }
-editProfileForm.addEventListener('submit', handleFormSubmit);
+editProfileForm.addEventListener('submit', handleEditProfileFormSubmit);
 
 
 // Эвент на кнопку открытия добавления карточки
@@ -55,8 +68,8 @@ addCardBtn.addEventListener("click", () => {
 function handleAddCardFormSubmit(evt) {
     evt.preventDefault();
     const newCard =     {
-        name: addCardPopup.querySelector(".popup__input_type_card-name").value,
-        link: addCardPopup.querySelector(".popup__input_type_url").value,
+        name: addCardPopupName.value,
+        link: addCardPopupUrl.value,
     };
     cardList.prepend(createCard(newCard, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
     addNewPlaceForm.reset();
@@ -65,17 +78,17 @@ function handleAddCardFormSubmit(evt) {
 addCardPopup.addEventListener('submit', handleAddCardFormSubmit);
 
 // Обработчик закрытия поп-апов по клику на крестик
-document.addEventListener("click", (evt) => {
-    if (evt.target.classList.contains('popup__close')) {
-        // Закрываем поп-ап, который содержит кликнутую кнопку
+popUpCloseBtns.forEach(popUpCloseBtn => {
+    popUpCloseBtn.addEventListener('click', (evt)=> {
         closeModal(evt.target.closest('.popup'));
-    }
-})
+    });
+});
 
 
 // Функция открытия карточки по клику
 function openCard(popUp, element) {
     popUp.querySelector('.popup__image').src = element.link;
+    popUp.querySelector('.popup__image').alt = element.name;
     popUp.querySelector('.popup__caption').textContent = element.name;
     openModal(popUp)
 }
