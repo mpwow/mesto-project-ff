@@ -1,14 +1,8 @@
-// Темплейт карточки
-const cardTemplate = document.querySelector("#card-template").content;
-
-// DOM узлы
-const cardList = document.querySelector(".places__list");
-const cardElement = cardTemplate.querySelector(".card");
 
 // Функция создания карточки
-const createCard = function (card, delFunc) {
+export const createCard = function (card, cardForClone, delFunc, likeCard, openCard, cardPopUp) {
     // Клонируем темплейт карточки
-    const cardElementClone = cardElement.cloneNode(true);
+    const cardElementClone = cardForClone.cloneNode(true);
 
     // Получаем изображение карточки и устанавливаем параметры
     const cardElementCloneImage = cardElementClone.querySelector(".card__image");
@@ -25,15 +19,31 @@ const createCard = function (card, delFunc) {
         delFunc(cardElementCloneDeleteBtn, '.card')
     })
 
+    // Получаем кнопку лайка и устанавливаем событие для лайка
+    const cardElementLikeBtn = cardElementClone.querySelector(".card__like-button");
+    cardElementLikeBtn.addEventListener("click",()=> {
+        likeCard(cardElementLikeBtn, 'card__like-button_is-active')
+    })
+
+    // Добавляем событие на открытие карточки
+    const cardElementImg = cardElementClone.querySelector(".card__image");
+    cardElementImg.addEventListener("click",()=> {
+        openCard(cardPopUp, card)
+    })
+
     return cardElementClone;
 }
 
 // Функция удаления карточки
-function deleteCard(deleteButton, selectorToDelete) {
+export function deleteCard(deleteButton, selectorToDelete) {
     deleteButton.closest(selectorToDelete).remove()
 }
 
-// Вывести карточки на страницу
-for (let i = 0; i < initialCards.length; i++) {
-    cardList.append(createCard(initialCards[i], deleteCard));
+// Функция поставить лайк
+export function likeCard(element, classForLike) {
+    if (!element.classList.contains(classForLike)) {
+        element.classList.add(classForLike)
+    } else {
+        element.classList.remove(classForLike)
+    }
 }
