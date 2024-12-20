@@ -36,24 +36,20 @@ const profileDescription = document.querySelector('.profile__description');
 // Все крестики закрытия поп-апов
 const popUpCloseBtns = document.querySelectorAll('.popup__close');
 
-// Записываем данные со страницы в инпуты формы
-editProfileForm.name.value = profileTitle.textContent;
-editProfileForm.description.value = profileDescription.textContent;
 
 // Эвент на кнопку открытия формы редактирования
 editProfifeBtn.addEventListener("click", () => {
     openModal(editProfilePopup);
+    editProfileForm.name.value = profileTitle.textContent;
+    editProfileForm.description.value = profileDescription.textContent;
 });
 // Обработчик «отправки» формы редактирования
 function handleEditProfileFormSubmit(evt) {
     evt.preventDefault();
 
-    // Записываем данные со страницы в инпуты формы
+    // Передаем данные из инпутов формы на страницу
     profileTitle.textContent = editProfileForm.name.value;
     profileDescription.textContent = editProfileForm.description.value;
-    // Передаем данные из инпутов формы на страницу
-    editProfileForm.name.value = profileTitle.textContent;
-    editProfileForm.description.value = profileDescription.textContent;
 
     closeModal(editProfilePopup);
 }
