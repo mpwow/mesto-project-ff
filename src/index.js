@@ -128,6 +128,7 @@ editProfileAvatarForm.addEventListener('submit', handleEditProfileAvatarFormSubm
 // Эвент на кнопку открытия добавления карточки
 addCardBtn.addEventListener("click", () => {
     openModal(addCardPopup);
+    clearValidation(addCardPopup, validationSettings);
 })
 // Обработчик добавления новой карточки на страницу
 function handleAddCardFormSubmit(evt) {
