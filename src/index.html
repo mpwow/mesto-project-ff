@@ -15,11 +15,16 @@
   </header>
   <main class="content">
     <section class="profile page__section">
-      <div class="profile__image" style="background-image: url('<%=require('./images/avatar.jpg')%>');"></div>
+      <div class="profile__image-container profile__edit-avatar-button">
+        <div class="profile__image"></div>
+        <svg width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M26 3.454 6.77 22.794 3.336 19.29 22.517 0 26 3.454ZM0 26l5.102-1.53-3.581-3.453L0 26Z" fill="#fff"/>
+        </svg>
+      </div>
       <div class="profile__info">
-        <h1 class="profile__title">Жак-Ив Кусто</h1>
+        <h1 class="profile__title"></h1>
         <button class="profile__edit-button" type="button"></button>
-        <p class="profile__description">Исследователь океана</p>
+        <p class="profile__description"></p>
       </div>
       <button class="profile__add-button" type="button"></button>
     </section>
@@ -33,13 +38,26 @@
       © 2021 Mesto Russia
     </p>
   </footer>
+  <div class="popup popup_type_edit-avatar popup_is-animated">
+    <div class="popup__content">
+      <button type="button" class="popup__close"></button>
+      <h3 class="popup__title">Обновить аватар</h3>
+      <form class="popup__form" name="update-avatar">
+        <input id="add-avatar-input-link" type="url" name="avatar" class="popup__input popup__input_type_avatar_url" pattern="^(https?:\/\/)((?!-)(?!.*--)[a-zA-Z\-0-9]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}(\/[^\s]*)?$" data-error-message="Введите адрес сайта." placeholder="Ссылка на картинку" required>
+        <span class="add-avatar-input-link-error popup__input-message-error"></span>
+        <button type="submit" class="button popup__button">Сохранить</button>
+      </form>
+    </div>
+  </div>
   <div class="popup popup_type_edit popup_is-animated">
     <div class="popup__content">
       <button type="button" class="popup__close"></button>
       <h3 class="popup__title">Редактировать профиль</h3>
       <form class="popup__form" name="edit-profile">
-        <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" required>
-        <input type="text" name="description" class="popup__input popup__input_type_description" placeholder="Занятие" required>
+        <input id="edit-input-name" type="text" name="name" class="popup__input popup__input_type_name" pattern="^[a-zA-Zа-яёА-ЯЁ\- ]*$" data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" placeholder="Имя" minlength="2" maxlength="40" required>
+        <span class="edit-input-name-error popup__input-message-error"></span>
+        <input id="edit-input-desc" type="text" name="description" class="popup__input popup__input_type_description" pattern="^[a-zA-Zа-яёА-ЯЁ\- ]*$" data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" placeholder="Занятие" minlength="2" maxlength="200" required>
+        <span class="edit-input-desc-error popup__input-message-error"></span>
         <button type="submit" class="button popup__button">Сохранить</button>
       </form>
     </div>
@@ -49,8 +67,10 @@
       <button type="button" class="popup__close"></button>
       <h3 class="popup__title">Новое место</h3>
       <form class="popup__form" name="new-place">
-        <input type="text" name="place-name" class="popup__input popup__input_type_card-name" placeholder="Название" required>
-        <input type="url" name="link" class="popup__input popup__input_type_url" placeholder="Ссылка на картинку" required>
+        <input id="add-place-input-name" type="text" name="place-name" class="popup__input popup__input_type_card-name" pattern="^[a-zA-Zа-яёА-ЯЁ\- ]*$" data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы" placeholder="Название" minlength="2" maxlength="30" required>
+        <span class="add-place-input-name-error popup__input-message-error"></span>
+        <input id="add-place-input-link" type="url" name="link" class="popup__input popup__input_type_url" pattern="^(https?:\/\/)((?!-)(?!.*--)[a-zA-Z\-0-9]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}(\/[^\s]*)?$" data-error-message="Введите адрес сайта." placeholder="Ссылка на картинку" required>
+        <span class="add-place-input-link-error popup__input-message-error"></span>
         <button type="submit" class="button popup__button">Сохранить</button>
       </form>
     </div>
@@ -71,7 +91,10 @@
     <div class="card__description">
       <h2 class="card__title">
       </h2>
-      <button type="button" class="card__like-button"></button>
+      <div class="card__like-container">
+        <button type="button" class="card__like-button"></button>
+        <span class="card__like-counter">6</span>
+      </div>
     </div>
   </li>
 </template>

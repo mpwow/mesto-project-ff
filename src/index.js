@@ -1,14 +1,24 @@
 import './pages/index.css'
-import {initialCards} from "./components/cards";
 import {createCard, deleteCard, likeCard} from "./components/card";
 import {openModal, closeModal} from "./components/modal"
-
+import {enableValidation, clearValidation} from "./components/validation";
+import {getUserAndCards, updateUserData, addNewCard, updateUserAvatar} from "./components/api"
 
 // Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
-// DOM узлы для карточек
-const cardList = document.querySelector(".places__list");
+// Элемент одной карточки внутри шаблона
 const cardElement = cardTemplate.querySelector(".card");
+// Элемент списка карточек
+const cardList = document.querySelector(".places__list");
+
+// Кнопка редактирования фото профиля
+const editProfifeAvatarBtn = document.querySelector(".profile__edit-avatar-button");
+// Поп-ап редактирования фото профиля
+const editProfileAvatarPopup = document.querySelector(".popup_type_edit-avatar");
+// Форма редактирования аватарки
+const editProfileAvatarForm = document.forms["update-avatar"]
+// Элемент с картинкой аватарки пользователя
+const userAvatar = document.querySelector(".profile__image");
 
 // Кнопка редактирования профиля
 const editProfifeBtn = document.querySelector(".profile__edit-button");
@@ -21,41 +31,100 @@ const editProfileForm = document.forms["edit-profile"]
 const addCardBtn = document.querySelector(".profile__add-button");
 // Поп-ап добавления карточки
 const addCardPopup = document.querySelector(".popup_type_new-card");
-const addCardPopupName = addCardPopup.querySelector(".popup__input_type_card-name");
-const addCardPopupUrl = addCardPopup.querySelector(".popup__input_type_url");
 // Форма добавления новой карточки
 const addNewPlaceForm = document.forms["new-place"]
+// Инпут с названием внутри попапа добавления карточки
+const addCardPopupName = addCardPopup.querySelector(".popup__input_type_card-name");
+// Инпут с ссылкой внутри попапа добавления карточки
+const addCardPopupUrl = addCardPopup.querySelector(".popup__input_type_url");
 
-// Поп-ап по клику на карточку
+// Попап по клику на карточку
 const fullScreenCardPopUp = document.querySelector(".popup_type_image");
 
-// Получаем имя и описание на странице и записываем их значения в
+// Элемент с именем пользователя на странице
 const profileTitle = document.querySelector('.profile__title');
+// Элемент с описанием пользователя на странице
 const profileDescription = document.querySelector('.profile__description');
 
-// Все крестики закрытия поп-апов
+// Массив с элементами закрытия форм на странице (крестики)
 const popUpCloseBtns = document.querySelectorAll('.popup__close');
 
+// Объект с данными для валидации
+const validationSettings = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+}
 
-// Эвент на кнопку открытия формы редактирования
+// Here comes API
+// Функция перезапрашивает данные пользователя и карточки с бэка и добавляет их на страницу
+function updateUserAndCardsOnPage() {
+    getUserAndCards().then(result => {
+        const { user, cards } = result;  // Деструктурируем объект
+        // подтягиваем карточки с бэка, предварительно убрав старые со страницы
+        cardList.innerHTML = "";
+        for (let i = 0; i < cards.length; i++) {
+            cardList.append(createCard(user, cards[i], cards[i].likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+        }
+        // подтягиваем данные пользователя с бэка
+        profileTitle.textContent = user.name;
+        profileDescription.textContent = user.about;
+        // при загрузке обновляем аватар с бэка
+        userAvatar.style.backgroundImage = `url("${user.avatar}")`;
+    });
+}
+// Вызываем функцию получени данных при загрузке страницы
+updateUserAndCardsOnPage()
+
+// Форма редактирования данных пользователя
+// Вешаем эвент на кнопку открытия формы редактирования
 editProfifeBtn.addEventListener("click", () => {
     openModal(editProfilePopup);
+    clearValidation(editProfilePopup, validationSettings);
+    // Данные в форме будут предзаполнены
     editProfileForm.name.value = profileTitle.textContent;
     editProfileForm.description.value = profileDescription.textContent;
 });
-// Обработчик «отправки» формы редактирования
+
+// Обработчик отправки формы редактирования
 function handleEditProfileFormSubmit(evt) {
     evt.preventDefault();
-
-    // Передаем данные из инпутов формы на страницу
-    profileTitle.textContent = editProfileForm.name.value;
-    profileDescription.textContent = editProfileForm.description.value;
-
-    closeModal(editProfilePopup);
+    changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    // отправляем данные на бэк, из ответа достаем новое имя и описание
+    updateUserData(editProfileForm.name.value, editProfileForm.description.value).then(()=> {
+        updateUserAndCardsOnPage();
+    }).then(()=> {
+        closeModal(editProfilePopup);
+        changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    });
 }
 editProfileForm.addEventListener('submit', handleEditProfileFormSubmit);
 
+// Форма редактирования данных пользователя
+// Вешаем эвент на кнопку открытия формы редактирования аватарки юзера
+editProfifeAvatarBtn.addEventListener("click", () => {
+    openModal(editProfileAvatarPopup);
+    clearValidation(editProfileAvatarPopup, validationSettings);
+});
 
+// Обработчик отправки новой аватарки юзера
+function handleEditProfileAvatarFormSubmit(evt) {
+    evt.preventDefault();
+    changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    // отправляем данные на бэк, из ответа достаем новое имя и описание
+    updateUserAvatar(editProfileAvatarForm.avatar.value).then((res)=> {
+        userAvatar.style.backgroundImage = `url("${res.avatar}")`;
+    }).then(()=> {
+        closeModal(editProfileAvatarPopup);
+        changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    });
+}
+editProfileAvatarForm.addEventListener('submit', handleEditProfileAvatarFormSubmit);
+
+// Форма добавления новой карточки
 // Эвент на кнопку открытия добавления карточки
 addCardBtn.addEventListener("click", () => {
     openModal(addCardPopup);
@@ -67,19 +136,25 @@ function handleAddCardFormSubmit(evt) {
         name: addCardPopupName.value,
         link: addCardPopupUrl.value,
     };
-    cardList.prepend(createCard(newCard, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
-    addNewPlaceForm.reset();
-    closeModal(addCardPopup);
+    changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    addNewCard(newCard.name, newCard.link).then(()=> {
+        updateUserAndCardsOnPage();
+        clearValidation(addCardPopup, validationSettings)
+        addNewPlaceForm.reset();
+    }).then(()=> {
+        closeModal(addCardPopup);
+        changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
+    })
+
 }
 addCardPopup.addEventListener('submit', handleAddCardFormSubmit);
 
-// Обработчик закрытия поп-апов по клику на крестик
+// Вешаем обработчики закрытия поп-апов по клику на крестик
 popUpCloseBtns.forEach(popUpCloseBtn => {
     popUpCloseBtn.addEventListener('click', (evt)=> {
         closeModal(evt.target.closest('.popup'));
     });
 });
-
 
 // Функция открытия карточки по клику
 function openCard(popUp, element) {
@@ -89,7 +164,16 @@ function openCard(popUp, element) {
     openModal(popUp)
 }
 
-// Вывод карточек на странице
-for (let i = 0; i < initialCards.length; i++) {
-    cardList.append(createCard(initialCards[i],cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+// Функция меняет текст в кнопке "Сохранить"
+function changeSaveButtonText(form, newTextButton, defaultTextButton) {
+    const buttonInForm = form.querySelector('.popup__button');
+    if (buttonInForm.textContent === defaultTextButton) {
+        buttonInForm.textContent = newTextButton;
+    } else {
+        buttonInForm.textContent = defaultTextButton;
+    }
 }
+
+// Включаем валидацию на все формы и все инпуты в них
+enableValidation(validationSettings);
+
