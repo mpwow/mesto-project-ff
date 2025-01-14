@@ -635,12 +635,6 @@ template {
   transition: opacity 0.3s ease;
 }
 
-@media screen and (max-width: 740px) {
-  .profile__image-container {
-    margin: 0 10px 0 0;
-  }
-}
-
 @media screen and (max-width: 480px) {
   .profile__image {
     margin-right: 0;
@@ -652,6 +646,10 @@ template {
   cursor: pointer;
 }
 
+.profile__image:hover + svg {
+  opacity: 1; /* Изначально иконка скрыта */
+}
+
 .profile__image-container {
   position: relative;
   display: flex;
@@ -660,15 +658,17 @@ template {
   margin: 0 29px 0 0;
 }
 
+@media screen and (max-width: 740px) {
+  .profile__image-container {
+    margin: 0 10px 0 0;
+  }
+}
+
 .profile__image-container svg {
   position: absolute;
   opacity: 0; /* Изначально иконка скрыта */
   transition: opacity 0.3s ease; /* Плавный переход */
   pointer-events: none; /* Иконка не будет блокировать взаимодействие с изображением */
-}
-
-.profile__image:hover + svg {
-  opacity: 1; /* Изначально иконка скрыта */
 }
 
 .profile {
@@ -908,6 +908,15 @@ template {
   }
 }
 
+.popup__input-message-error {
+    color: #FF0000;
+    font-size: 12px;
+    display: none;
+}
+.popup__input_type_error {
+    border-color: #FF0000;
+}
+
 .popup__button {
   width: 100%;
   height: 50px;
@@ -961,18 +970,8 @@ template {
   display: block;
 }
 
-.popup__input-message-error {
-    color: #FF0000;
-    font-size: 12px;
-    display: none;
-}
-
 .popup__error_visible {
     display: block;
-}
-
-.popup__input_type_error {
-    border-color: #FF0000;
 }
 
 .popup {
