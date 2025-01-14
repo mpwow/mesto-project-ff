@@ -39,7 +39,6 @@ export function enableValidation (
 
     function checkInputValidity (formElement, inputElement) {
         const customErrorMessage =  inputElement.dataset.errorMessage;
-        console.log(inputElement.validity.patternMismatch)
         if (inputElement.validity.patternMismatch) {
             showError(formElement, inputElement, customErrorMessage);
         } else if (!inputElement.validity.valid) {
