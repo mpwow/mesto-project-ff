@@ -1,0 +1,20 @@
+.profile__image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 29px 0 0;
+}
+
+@media screen and (max-width: 740px) {
+  .profile__image-container {
+    margin: 0 10px 0 0;
+  }
+}
+
+.profile__image-container svg {
+  position: absolute;
+  opacity: 0; /* Изначально иконка скрыта */
+  transition: opacity 0.3s ease; /* Плавный переход */
+  pointer-events: none; /* Иконка не будет блокировать взаимодействие с изображением */
+}
