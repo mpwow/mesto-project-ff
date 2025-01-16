@@ -2,7 +2,7 @@ import './pages/index.css'
 import {createCard, deleteCard, likeCard} from "./components/card";
 import {openModal, closeModal} from "./components/modal"
 import {enableValidation, clearValidation} from "./components/validation";
-import {getUserAndCards, updateUserData, addNewCard, updateUserAvatar} from "./components/api"
+import {getUserAndCards, updateUserData, addNewCard, updateUserAvatar, getUser} from "./components/api"
 
 // Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
@@ -40,6 +40,8 @@ const addCardPopupUrl = addCardPopup.querySelector(".popup__input_type_url");
 
 // Попап по клику на карточку
 const fullScreenCardPopUp = document.querySelector(".popup_type_image");
+const fullScreenCardPopUpImage = document.querySelector('.popup__image');
+const fullScreenCardPopUpCaption = document.querySelector('.popup__caption')
 
 // Элемент с именем пользователя на странице
 const profileTitle = document.querySelector('.profile__title');
@@ -58,8 +60,16 @@ const validationSettings = {
     inputErrorClass: 'popup__input_type_error',
     errorClass: 'popup__error_visible'
 }
-
 // Here comes API
+// Глобально сохраняем юзер айди в локалсторадже
+getUser().then(res => {
+    localStorage.setItem('userId', res._id);
+}).catch((err) => {
+    console.log(err);
+})
+// Достаем из локалстораджа юзер айди для дальнейшего использования
+const userId = localStorage.getItem('userId');
+
 // Функция перезапрашивает данные пользователя и карточки с бэка и добавляет их на страницу
 function updateUserAndCardsOnPage() {
     getUserAndCards().then(result => {
@@ -67,13 +77,15 @@ function updateUserAndCardsOnPage() {
         // подтягиваем карточки с бэка, предварительно убрав старые со страницы
         cardList.innerHTML = "";
         for (let i = 0; i < cards.length; i++) {
-            cardList.append(createCard(user, cards[i], cards[i].likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+            cardList.append(createCard(user._id, cards[i].owner._id, cards[i]._id, cards[i].link, cards[i].name, cards[i].likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
         }
         // подтягиваем данные пользователя с бэка
         profileTitle.textContent = user.name;
         profileDescription.textContent = user.about;
         // при загрузке обновляем аватар с бэка
         userAvatar.style.backgroundImage = `url("${user.avatar}")`;
+    }).catch((err) => {
+        console.log(err);
     });
 }
 // Вызываем функцию получени данных при загрузке страницы
@@ -96,8 +108,10 @@ function handleEditProfileFormSubmit(evt) {
     // отправляем данные на бэк, из ответа достаем новое имя и описание
     updateUserData(editProfileForm.name.value, editProfileForm.description.value).then(()=> {
         updateUserAndCardsOnPage();
-    }).then(()=> {
         closeModal(editProfilePopup);
+    }).catch((err) => {
+        console.log(err);
+    }).finally(() => {
         changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
     });
 }
@@ -117,8 +131,13 @@ function handleEditProfileAvatarFormSubmit(evt) {
     // отправляем данные на бэк, из ответа достаем новое имя и описание
     updateUserAvatar(editProfileAvatarForm.avatar.value).then((res)=> {
         userAvatar.style.backgroundImage = `url("${res.avatar}")`;
+        clearValidation(editProfileAvatarPopup, validationSettings);
+        editProfileAvatarForm.reset();
     }).then(()=> {
         closeModal(editProfileAvatarPopup);
+    }).catch((err) => {
+        console.log(err);
+    }).finally(() => {
         changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
     });
 }
@@ -138,14 +157,17 @@ function handleAddCardFormSubmit(evt) {
         link: addCardPopupUrl.value,
     };
     changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
-    addNewCard(newCard.name, newCard.link).then(()=> {
-        updateUserAndCardsOnPage();
-        clearValidation(addCardPopup, validationSettings)
+    addNewCard(newCard.name, newCard.link).then((res)=> {
+        cardList.prepend(createCard(userId, res.owner._id, res._id, res.link, res.name, res.likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+        clearValidation(addCardPopup, validationSettings);
         addNewPlaceForm.reset();
     }).then(()=> {
         closeModal(addCardPopup);
+    }).catch((err) => {
+        console.log(err);
+    }).finally(() => {
         changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
-    })
+    });
 
 }
 addCardPopup.addEventListener('submit', handleAddCardFormSubmit);
@@ -158,10 +180,10 @@ popUpCloseBtns.forEach(popUpCloseBtn => {
 });
 
 // Функция открытия карточки по клику
-function openCard(popUp, element) {
-    popUp.querySelector('.popup__image').src = element.link;
-    popUp.querySelector('.popup__image').alt = element.name;
-    popUp.querySelector('.popup__caption').textContent = element.name;
+function openCard(popUp, elementLink, elementName) {
+    fullScreenCardPopUpImage.src = elementLink;
+    fullScreenCardPopUpImage.alt = elementName;
+    fullScreenCardPopUpCaption.textContent = elementName;
     openModal(popUp)
 }
 

@@ -1,5 +1,27 @@
-// Функции валидации полей в формах
+// Функция скрытия ошибок валидации у поля
+function hideError (formElement, inputElement, errorClass, inputErrorClass) {
+    // Ищем спан для скрытия текста с ошибкой под валидируемым полем
+    const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
+    errorElement.textContent = '';
+    // Текст ошибки перестал отображаться на странице
+    errorElement.classList.remove(errorClass);
+    // Убрали у инпута класс с ошибкой - показывается красная линия под инпутом
+    inputElement.classList.remove(inputErrorClass);
+}
 
+// Функция отображения ошибок валидации у поля
+function showError (formElement, inputElement, errorMessage, errorClass, inputErrorClass) {
+    // Ищем спан для отображения текста с ошибкой под валидируемым полем
+    const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
+    // Проверка для того, чтобы понять какой текст ошибки показывать:
+    inputElement.value.length === 0 ? errorElement.textContent = 'Вы пропустили это поле.':errorElement.textContent = errorMessage;
+    // Текст ошибки стал отображаться на странице
+    errorElement.classList.add(errorClass);
+    // Добавить инпуту класс с ошибкой - показывается красная линия под инпутом
+    inputElement.classList.add(inputErrorClass);
+}
+
+// Функции валидации полей в формах
 export function enableValidation (
     {
         formSelector,
@@ -11,28 +33,6 @@ export function enableValidation (
     }
 ) {
 
-// Функция отображения ошибок валидации у поля
-    function showError (formElement, inputElement, errorMessage) {
-        // Ищем спан для отображения текста с ошибкой под валидируемым полем
-        const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-        // Проверка для того, чтобы понять какой текст ошибки показывать:
-        inputElement.value.length === 0 ? errorElement.textContent = 'Вы пропустили это поле.':errorElement.textContent = errorMessage;
-        // Текст ошибки стал отображаться на странице
-        errorElement.classList.add(errorClass);
-        // Добавить инпуту класс с ошибкой - показывается красная линия под инпутом
-        inputElement.classList.add(inputErrorClass);
-    }
-
-// Функция скрытия ошибок валидации у поля
-    function hideError (formElement, inputElement) {
-        // Ищем спан для скрытия текста с ошибкой под валидируемым полем
-        const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-        errorElement.textContent = '';
-        // Текст ошибки перестал отображаться на странице
-        errorElement.classList.remove(errorClass);
-        // Убрали у инпута класс с ошибкой - показывается красная линия под инпутом
-        inputElement.classList.remove(inputErrorClass);
-    }
 
 // Функция проверки валидности инпута - передается форма и поле инпута в ней
 // и при каждом инпуте идет проверка (реализуется через события)
@@ -42,9 +42,9 @@ export function enableValidation (
         if (inputElement.validity.patternMismatch) {
             showError(formElement, inputElement, customErrorMessage);
         } else if (!inputElement.validity.valid) {
-            showError(formElement, inputElement, inputElement.validationMessage);
+            showError(formElement, inputElement, inputElement.validationMessage, errorClass, inputErrorClass);
         } else {
-            hideError(formElement, inputElement);
+            hideError(formElement, inputElement, errorClass, inputErrorClass);
         }
     }
 
@@ -92,8 +92,6 @@ export function clearValidation(formElement, validationConfig) {
     const inputsList = Array.from(formElement.querySelectorAll(validationConfig.inputSelector));
     // Обходим список инпутов, по шаблону получаем селекторы спан-элемента с ошибкой и убираем текст в ней
     inputsList.forEach(inputElement => {
-        formElement.querySelector(`.${inputElement.id}-error`).textContent = '';
-        formElement.querySelector(`.${inputElement.id}-error`).classList.remove(validationConfig.errorClass);
-        inputElement.classList.remove(validationConfig.inputErrorClass);
+        hideError(formElement, inputElement, validationConfig.errorClass, validationConfig.inputErrorClass);
     })
 }
