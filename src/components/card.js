@@ -22,8 +22,11 @@ export const createCard = function (userId, cardOwnerId, cardId, cardLink, cardN
     } else {
         // Получаем кнопку удаления в карточке и устанавливаем коллбэк с удалением
         cardElementCloneDeleteBtn.addEventListener("click",()=> {
-            delFunc(cardElementClone);
-            deleteMyCard(cardId);
+            deleteMyCard(cardId).then(()=>{
+                delFunc(cardElementClone);
+            }).catch((err) => {
+                console.log(err);
+            });
         })
     }
 
@@ -61,17 +64,17 @@ export function deleteCard(card) {
 // Функция поставить/убрать лайк
 export function likeCard(element, classForLike, cardId, likeCounter) {
     if (!element.classList.contains(classForLike)) {
-        element.classList.add(classForLike)
         likeUserCard(cardId).then(res=>{
             likeCounter.textContent = res.likes.length;
+            element.classList.add(classForLike)
         }).catch((err) => {
             console.log(err);
         })
 
     } else {
-        element.classList.remove(classForLike);
         unLikeUserCard(cardId).then(res=>{
             likeCounter.textContent = res.likes.length;
+            element.classList.remove(classForLike);
         }).catch((err) => {
             console.log(err);
         })
