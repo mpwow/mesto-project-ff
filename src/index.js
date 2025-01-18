@@ -1,8 +1,16 @@
 import './pages/index.css'
-import {createCard, deleteCard, likeCard} from "./components/card";
+import {createCard, deleteCard, likeCard, isLiked} from "./components/card";
 import {openModal, closeModal} from "./components/modal"
 import {enableValidation, clearValidation} from "./components/validation";
-import {getUserAndCards, updateUserData, addNewCard, updateUserAvatar, getUser} from "./components/api"
+import {
+    getUserAndCards,
+    updateUserData,
+    addNewCard,
+    updateUserAvatar,
+    deleteMyCard,
+    likeUserCard,
+    unLikeUserCard
+} from "./components/api"
 
 // Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
@@ -61,23 +69,30 @@ const validationSettings = {
     errorClass: 'popup__error_visible'
 }
 // Here comes API
-// Глобально сохраняем юзер айди в локалсторадже
-getUser().then(res => {
-    localStorage.setItem('userId', res._id);
-}).catch((err) => {
-    console.log(err);
-})
-// Достаем из локалстораджа юзер айди для дальнейшего использования
-const userId = localStorage.getItem('userId');
+// Объявляем переменную для хранения юзер айди
+let userId;
 
 // Функция перезапрашивает данные пользователя и карточки с бэка и добавляет их на страницу
 function updateUserAndCardsOnPage() {
     getUserAndCards().then(result => {
         const { user, cards } = result;  // Деструктурируем объект
+        // Сохраняем юзер айди
+        userId = user._id;
         // подтягиваем карточки с бэка, предварительно убрав старые со страницы
         cardList.innerHTML = "";
         for (let i = 0; i < cards.length; i++) {
-            cardList.append(createCard(user._id, cards[i].owner._id, cards[i]._id, cards[i].link, cards[i].name, cards[i].likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+            cardList.append(createCard(
+                user._id,
+                cards[i].owner._id,
+                cards[i]._id,
+                cards[i].link,
+                cards[i].name,
+                cards[i].likes,
+                cardElement,
+                deleteHandler,
+                handlerLikeCard,
+                openCard
+            ));
         }
         // подтягиваем данные пользователя с бэка
         profileTitle.textContent = user.name;
@@ -158,7 +173,18 @@ function handleAddCardFormSubmit(evt) {
     };
     changeSaveButtonText(evt.target, 'Сохранение...', 'Сохранить');
     addNewCard(newCard.name, newCard.link).then((res)=> {
-        cardList.prepend(createCard(userId, res.owner._id, res._id, res.link, res.name, res.likes, cardElement, deleteCard, likeCard, openCard, fullScreenCardPopUp));
+        cardList.prepend(createCard(
+            userId,
+            res.owner._id,
+            res._id,
+            res.link,
+            res.name,
+            res.likes,
+            cardElement,
+            deleteHandler,
+            handlerLikeCard,
+            openCard
+        ));
         clearValidation(addCardPopup, validationSettings);
         addNewPlaceForm.reset();
     }).then(()=> {
@@ -180,11 +206,29 @@ popUpCloseBtns.forEach(popUpCloseBtn => {
 });
 
 // Функция открытия карточки по клику
-function openCard(popUp, elementLink, elementName) {
+function openCard(elementLink, elementName) {
     fullScreenCardPopUpImage.src = elementLink;
     fullScreenCardPopUpImage.alt = elementName;
     fullScreenCardPopUpCaption.textContent = elementName;
-    openModal(popUp)
+    openModal(fullScreenCardPopUp)
+}
+
+// Обработчик удаления карточки
+function deleteHandler(cardId, card) {
+    deleteMyCard(cardId).then(()=> {
+        deleteCard(card);
+    }).catch((err) => {
+        console.log(err);
+    })
+}
+
+// Обработчик простановки/убирания лайка с карточки
+function handlerLikeCard(counter, button, cardId)  {
+    (isLiked(button) ? unLikeUserCard(cardId) : likeUserCard(cardId))
+        .then(res => likeCard(counter, button, res.likes))
+            .catch((err) => {
+                console.log(err);
+            })
 }
 
 // Функция меняет текст в кнопке "Сохранить"
