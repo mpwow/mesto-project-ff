@@ -40,7 +40,7 @@ export function enableValidation (
     function checkInputValidity (formElement, inputElement) {
         const customErrorMessage =  inputElement.dataset.errorMessage;
         if (inputElement.validity.patternMismatch) {
-            showError(formElement, inputElement, customErrorMessage);
+            showError(formElement, inputElement, customErrorMessage, errorClass, inputErrorClass);
         } else if (!inputElement.validity.valid) {
             showError(formElement, inputElement, inputElement.validationMessage, errorClass, inputErrorClass);
         } else {
